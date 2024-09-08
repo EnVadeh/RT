@@ -9,6 +9,8 @@ int main() {
     camera sC;
     sC.aspect_ratio = 16.0 / 9.0;
     sC.image_width = 800;
+    sC.max_depth = 50;
+    sC.samples_per_pixel = 10;
 
     //world
     hittable_list world;

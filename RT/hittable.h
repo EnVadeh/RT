@@ -1,11 +1,14 @@
 #pragma once
 #include "utils.h"
 
-class hit_record {
+class material;
+
+class hit_record { //for a single ray, last time it hit and attributes related to it's hit
 public:
 	point3 p; //where it's hitting
 	vec3 normal; //normal where it's hit
-	double t;
+	shared_ptr<material> mat;
+	double t; //how far from the ray's origin the intersection/hit takes place
 	bool front_face;
 
 	void set_face_normal(const ray& r, const vec3& outward_normal) {

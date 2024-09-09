@@ -39,6 +39,11 @@ public:
         return vec3(random_double(min, max), random_double(min, max), random_double(min, max));
     }
 
+    bool near_zero() const {
+        auto s = 1e-8;
+        return (std::fabs(e[0]) < s) && (std::fabs(e[1]) < s) && (std::fabs(e[2]) < s);
+    }
+
 };
 // point3 is just an alias for vec3, but useful for geometric clarity in the code.
 using point3 = vec3;
@@ -93,4 +98,15 @@ inline vec3 random_on_hemisphere(const vec3& normal) {
         return on_unit_sphere;
     else
         return -on_unit_sphere;
+}
+
+inline vec3 reflect(const vec3& v, const vec3& n) {
+    return v - 2 * dot(v, n) * n;
+}
+
+inline vec3 refract(const vec3& v, const vec3& n, double relative_rindex) {
+    double cos_theta = std::fmin(dot(-v, n), 1.0);
+    vec3 refract_perp = relative_rindex * (v + cos_theta * n);
+    vec3 refract_pll = -std::sqrt(std::fabs(1.0 - refract_perp.length_squared())) * n;
+    return refract_perp + refract_pll;
 }

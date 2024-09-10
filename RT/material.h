@@ -50,6 +50,12 @@ public:
 class dielectric : public material {
 private: 
 	double refractive_index;
+	
+	static double reflectance(double cosine, double refraction_index) {
+		auto r0 = (1 - refraction_index) / (1 + refraction_index);
+		r0 *= r0;
+		return r0 + (1 - r0) * std::pow((1 - cosine), 5);
+	}
 public:
 	dielectric(double refractive_index) : refractive_index(refractive_index) {}
 
@@ -58,9 +64,19 @@ public:
 		double ri = rec.front_face ? (1.0 / refractive_index) : refractive_index;
 
 		vec3 unit_direction = unit_vector(r_in.direction());
-		vec3 refracted = refract(unit_direction, rec.normal, ri);
 
-		scattered = ray(rec.p, refracted); //origin will be the hit point, direction is the refracted direction
+		double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
+		double sin_theta = std::sqrt(1.0 - cos_theta * cos_theta);
+
+		bool cannot_refract = ri * sin_theta > 1.0; //theta ->90 degrees means fresnel reflection
+		vec3 direction;
+
+		if (cannot_refract || reflectance(cos_theta, ri) > random_double())
+			direction = reflect(unit_direction, rec.normal);
+		else
+			direction = refract(unit_direction, rec.normal, ri);
+
+		scattered = ray(rec.p, direction); //origin will be the hit point
 		return true;
 	}
 };
